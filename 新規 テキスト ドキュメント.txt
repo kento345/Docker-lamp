@@ -1,0 +1,98 @@
+//mysql
+docker-compose exec mysql bash
+//新規ユーザ
+CREATE USER 'data_user'@'localhost' IDENTIFIED BY 'data';
+select user,host from mysql.user;
+GRANT ALL PRIVILEGES ON *.* TO 'data_user'@'localhost';
+exit
+//新規ユーザログイン
+mysql -udata_user -p
+show databases;
+//新規スキーマ
+DROP DATABASE IF EXISTS test_db;
+CREATE DATABASE IF NOT EXISTS test_db;
+show databases;
+//databaseの変更
+use test_db;
+show tables;
+//新規テーブル
+DROP TABLE IF EXISTS test_table;
+CREATE TABLE IF NOT EXISTS test_table(id INT PRIMARY KEY,name VARCHAR(255),example_number INT,example_message VARCHAR(255));
+show tables;
+//データ抽出
+select * from test_table;
+//データ挿入
+insert into test_table(id,name,example_number,example_message) values(1,'test1',10,'message1');
+//where
+select * from test_table where id = 2;
+select * from test_table where example_number >= 20;
+select * from test_table where example_message like '%1';
+//データの更新
+update test_table set example_message = 'update message2' where id = 2;
+//データ消去
+delete from test_table where id = 2;
+
+
+DROP DATABASE IF EXISTS data_master;
+CREATE DATABASE IF NOT EXISTS data_master;
+use data_master;
+show tables;
+DROP TABLE IF EXISTS students_table;
+CREATE TABLE IF NOT EXISTS students_table(student_id INT PRIMARY KEY,student_name VARCHAR(255),class_id INT);
+show tables;
+DROP TABLE IF EXISTS classes_table;
+CREATE TABLE IF NOT EXISTS classes_table(class_id INT PRIMARY KEY,class_name VARCHAR(255));
+show tables;
+insert into students_table(student_id,student_name,class_id) values (1,'Tanaka',1),(2,'Sato',1),(3,'Suzuki',2),(4,'Kimura',2);
+select * from students_table;
+insert into classes_table(class_id,class_name) values (1,'TProgrammer Class'),(2,'Designer Class');
+select * from classes_table;
+//内部結合
+select * from a_table a inner join common_table c on a.common_id = c.common_id;
+//外部結合
+select * from students_table a left outer join classes_table c on a.class_id = c.class_id;
+insert into students (student_id, student_name, class_id) values (5, 'Takagi', 3);
+select * from students;
+DROP TABLE IF EXISTS teachrs_table;
+CREATE TABLE IF NOT EXISTS teachrs_table(teacher_id INT PRIMARY KEY,teacher_name VARCHAR(255),class_id INT);
+show tables;
+insert into teachrs_table(teacher_id,teacher_name,class_id) values (1,'Katou',1),(2,'Hasiguti',2);
+select * from students_table union select * from teachrs_table;
+//volumeの消去
+docker stop $(docker ps -q)
+docker rm $(docker ps -q -a)
+docker rmi $(docker images -q)
+docker volume rm $(docker volume ls -qf dangling=true)
+
+docker-compose up -d --build
+docker-compose exec mysql bash
+mysql -uroot -p < /root/initialize.sql
+mysql -udata_user -p
+data
+
+CREATE TABLE IF NOT EXISTS jobs(id INT PRIMARY KEY,name VARCHAR(255));
+CREATE TABLE IF NOT EXISTS users(id INT PRIMARY KEY,name VARCHAR(255),level INT,job_id INT);
+CREATE TABLE IF NOT EXISTS battle_log(id INT AUTO_INCREMENT  PRIMARY KEY ,user_id INT,result_win BOOLEAN ,create_data DATE);
+
+select * from users where id = 5 ;
+//数値の昇順,降順 ORDER BY(DESC :昇順,ASC : 降順)
+select * from users order by level DESC limit 3;
+//制限
+LIMIT 
+//グループ化,カウント GROUP BY 
+select create_date,count(id) from battle_log where create_date = '2025-01-05' group by create_date ;
+//カラム名変更バージョンによる
+ALTER TABLE battle_log  RENAME COLUMN create_data TO create_date;
+ALTER TABLE battle_log CHANGE create_data create_date DATETIME;
+//特定のデータの結合
+select u.id,u.name,u.job_id,j.name from users u left outer join jobs j on u.job_id = j.id order by u.id;
+
+
+//ボリューム消去コマンド
+docker stop $(docker ps -q)
+docker rm $(docker ps -q -a)
+docker rmi $(docker images -q)
+docker volume rm $(docker volume ls -qf dangling=true)
+
+//データベースの初期化(データを流す)
+mysql -uroot -p </root/initialize.sql
