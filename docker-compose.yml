@@ -1,7 +1,22 @@
 version: '3.7'
 
 services:
-  mysql:
+ web:
+    build: ./docker/web
+    volumes:
+      - ./web:/var/www/html
+      - ./docker/.ssh/test_rsa:/root/.ssh/test_rsa
+    ports:
+      - '80:80'
+ storage:
+    build: ./docker/storage
+    volumes:
+      - ./storage:/storage
+      - ./docker/.ssh/test_rsa.pub:/root/.ssh/authorized_keys
+    ports:
+      - '10022:22'
+
+ mysql:
     build: ./mysql
     volumes:
       - db_data:/var/lib/mysql
@@ -9,7 +24,7 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: 'p@ssword'
 
-  phpmyadmin:
+ phpmyadmin:
     depends_on:
       - mysql
     image: phpmyadmin/phpmyadmin
@@ -19,7 +34,7 @@ services:
     ports:
       - "8080:80"
 
-  php-apache:
+ php-apache:
     build: ./php
     volumes:
       - ./htdocs:/var/www/html
@@ -30,7 +45,7 @@ services:
       - mysql
 
 
-  openssh-server:
+ openssh-server:
     image: linuxserver/openssh-server:version-9.6_p1-r0
     container_name: openssh-server
     hostname: openssh-server #optional
