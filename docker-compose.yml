@@ -23,11 +23,13 @@ services:
     build: ./php
     volumes:
       - ./htdocs:/var/www/html
+      - ./.ssh/test_rsa:/.ssh/test_rsa
     restart: always
     ports:
       - "80:80"
     depends_on:
       - mysql
+
 
 
   openssh-server:
