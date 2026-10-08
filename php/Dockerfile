@@ -20,3 +20,15 @@ RUN docker-php-ext-install pdo pdo_mysql
 
 RUN pecl install memcached \
     && docker-php-ext-enable memcached
+
+
+RUN apt-get update && apt-get install -y \
+    autoconf \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN pecl install redis-5.3.7 \
+    && docker-php-ext-enable redis
+
+COPY . /var/www/html/
+
